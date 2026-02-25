@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.22
+ * @version 2.1.23
  *
  */
 
@@ -288,6 +288,7 @@ class RoomClient {
         this.chatPeerId = 'all';
         this.chatPeerName = 'all';
         this.chatPeerAvatar = '';
+        this.unreadMessageCounts = {};
 
         // HeyGen Video AI
         this.videoAIContainer = null;
@@ -5552,7 +5553,20 @@ class RoomClient {
     }
 
     async showMessage(data, toggleChat = true) {
+        const isPublicMessage = data.to_peer_id === 'all';
+        const messagePeerId = isPublicMessage ? 'all' : data.peer_id;
+
         if (toggleChat && !this.isChatOpen && this.showChatOnMessage) {
+            // Auto-switch to the correct tab before opening the chat panel
+            if (isPublicMessage) {
+                this.chatPeerId = 'all';
+                this.chatPeerName = 'all';
+                this.chatPeerAvatar = '';
+            } else {
+                this.chatPeerId = data.peer_id;
+                this.chatPeerName = data.peer_name;
+                this.chatPeerAvatar = data.peer_avatar || '';
+            }
             await this.toggleChat();
         }
 
@@ -5579,17 +5593,44 @@ class RoomClient {
             this.sound('message');
         }
 
+        // Track unread count when message is not currently visible
+        const isMessageVisible = this.isChatOpen && this.chatPeerId === messagePeerId;
+        if (!isMessageVisible) {
+            this.unreadMessageCounts[messagePeerId] = (this.unreadMessageCounts[messagePeerId] || 0) + 1;
+            this.updateUnreadCountBadge(messagePeerId);
+        }
+
         const participantsList = this.getId('participantsList');
         const participantsListItems = participantsList.getElementsByTagName('li');
         for (let i = 0; i < participantsListItems.length; i++) {
             const li = participantsListItems[i];
+            // INCOMING PUBLIC MESSAGE
+            if (isPublicMessage && li.id === 'all' && !isMessageVisible) {
+                li.classList.add('pulsate');
+            }
             // INCOMING PRIVATE MESSAGE
-            if (li.id === data.peer_id && data.to_peer_id != 'all') {
+            if (li.id === data.peer_id && !isPublicMessage && !isMessageVisible) {
                 li.classList.add('pulsate');
                 if (!['all', 'ChatGPT', 'DeepSeek'].includes(data.to_peer_id)) {
                     this.getId(`${data.peer_id}-unread-msg`).classList.remove('hidden');
                 }
             }
+        }
+    }
+
+    updateUnreadCountBadge(peerId) {
+        const count = this.unreadMessageCounts[peerId] || 0;
+        try {
+            const badge = this.getId(`${peerId}-unread-count`);
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.textContent = '';
+                badge.classList.add('hidden');
+            }
+        } catch (e) {
+            // Badge element may not exist yet if participants list hasn't rendered
         }
     }
 
@@ -9730,12 +9771,21 @@ class RoomClient {
         // CURRENT SELECTED PEER
         for (let i = 0; i < participantsListItems.length; i++) {
             participantsListItems[i].classList.remove('active');
-            participantsListItems[i].classList.remove('pulsate'); // private new message to read
-            if (!['all', 'ChatGPT', 'DeepSeek'].includes(peer_id)) {
-                // icon private new message to read
-                this.getId(`${peer_id}-unread-msg`).classList.add('hidden');
-            }
         }
+
+        // Clear pulsate and unread indicators for selected peer
+        const selectedLi = this.getId(peer_id);
+        if (selectedLi) selectedLi.classList.remove('pulsate');
+
+        if (!['all', 'ChatGPT', 'DeepSeek'].includes(peer_id)) {
+            // icon private new message to read
+            this.getId(`${peer_id}-unread-msg`).classList.add('hidden');
+        }
+
+        // Clear unread count badge for selected peer
+        this.unreadMessageCounts[peer_id] = 0;
+        this.updateUnreadCountBadge(peer_id);
+
         participant.classList.add('active');
 
         isChatGPTOn = false;

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.22
+ * @version 2.1.23
  *
  */
 
@@ -5767,7 +5767,7 @@ function getParticipantsList(peers) {
         />
         <div class="about">
             <div class="name">Public chat</div>
-            <div class="status"> <i class="fa fa-circle online"></i> online ${participantsCount}</div>
+            <div class="status"> <i class="fa fa-circle online"></i> online ${participantsCount} <span id="all-unread-count" class="unread-count hidden"></span></div>
         </div>`;
 
     // ONLY PRESENTER CAN EXECUTE THIS CMD
@@ -5855,7 +5855,7 @@ function getParticipantsList(peers) {
                     />
                     <div class="about">
                         <div class="name">${peer_name_limited}</div>
-                        <div class="status"> <i class="fa fa-circle online"></i> online <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> </div>
+                        <div class="status"> <i class="fa fa-circle online"></i> online <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> <span id="${peer_id}-unread-count" class="unread-count hidden"></span> </div>
                     </div>
 
                     <div class="dropdown">
@@ -5930,7 +5930,7 @@ function getParticipantsList(peers) {
                 />
                     <div class="about">
                         <div class="name">${peer_name_limited}</div>
-                        <div class="status"> <i class="fa fa-circle online"></i> online <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> </div>
+                        <div class="status"> <i class="fa fa-circle online"></i> online <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> <span id="${peer_id}-unread-count" class="unread-count hidden"></span> </div>
                     </div>
                 `;
 
@@ -6715,7 +6715,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.22',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.23',
         html: `
             <br />
             <div id="about">

@@ -2431,6 +2431,26 @@ hr {
 }
 
 /*--------------------------------------------------------------
+# Unread message count badge
+--------------------------------------------------------------*/
+
+.unread-count {
+    display: inline-block;
+    background-color: #ff3b30;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    text-align: center;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+/*--------------------------------------------------------------
 # Video AI Avatars
 --------------------------------------------------------------*/
 
