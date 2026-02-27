@@ -129,6 +129,36 @@
     background: var(--body-bg);
 }
 
+.rec-indicator {
+    display: none;
+    margin-left: 8px;
+    white-space: nowrap;
+    background: transparent;
+    animation: none;
+}
+
+.rec-indicator.active {
+    display: inline;
+    animation: recPulsate 3s ease-out infinite;
+}
+
+.rec-indicator.paused {
+    animation: none;
+    opacity: 0.5;
+}
+
+@keyframes recPulsate {
+    0% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.5;
+    }
+}
+
 .fscreen {
     position: absolute;
     right: 0;

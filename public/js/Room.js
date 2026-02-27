@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.24
+ * @version 2.1.25
  *
  */
 
@@ -1975,6 +1975,9 @@ function startRecordingTimer() {
         if (rc.isRecording()) {
             recElapsedTime++;
             recordingStatus.innerText = secondsToHms(recElapsedTime);
+            rc._getRecIndicators().forEach((el) => {
+                el.innerHTML = '🔴 ' + (recordingStatus.innerText !== '0s' ? recordingStatus.innerText : 'REC');
+            });
         }
     }, 1000);
 }
@@ -3684,16 +3687,19 @@ function handleRoomClientEvents() {
         startRecordingTimer();
         isRecording = true;
         rc.updatePeerInfo(peer_name, socket.id, 'recording', true);
+        rc.showRecordingIndicator();
     });
     rc.on(RoomClient.EVENTS.pauseRec, () => {
         console.log('Room event: Client pause recoding');
         hide(pauseRecButton);
         show(resumeRecButton);
+        rc.pauseRecordingIndicator();
     });
     rc.on(RoomClient.EVENTS.resumeRec, () => {
         console.log('Room event: Client resume recoding');
         hide(resumeRecButton);
         show(pauseRecButton);
+        rc.resumeRecordingIndicator();
     });
     rc.on(RoomClient.EVENTS.stopRec, () => {
         console.log('Room event: Client stop recoding');
@@ -3705,6 +3711,7 @@ function handleRoomClientEvents() {
         stopRecordingTimer();
         isRecording = false;
         rc.updatePeerInfo(peer_name, socket.id, 'recording', false);
+        rc.hideRecordingIndicator();
     });
     rc.on(RoomClient.EVENTS.raiseHand, () => {
         console.log('Room event: Client raise hand');
@@ -6715,7 +6722,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.24',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.25',
         html: `
             <br />
             <div id="about">

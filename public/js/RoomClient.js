@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.24
+ * @version 2.1.25
  *
  */
 
@@ -2630,7 +2630,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, vp, ts, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv, st, dw;
+        let elem, vb, vp, ts, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv, st, dw, ri;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -2676,6 +2676,11 @@ class RoomClient {
                 p.id = this.peer_id + '__name';
                 p.className = html.userName;
                 p.innerText = (isPresenter ? '⭐️ ' : '') + this.peer_name + ' (me)';
+
+                ri = this.createElement(this.peer_id + '__recIndicator', 'span', 'rec-indicator');
+                ri.innerHTML = '🔴 ';
+                p.appendChild(ri);
+                if (this._isRecording) ri.classList.add('active');
 
                 i = document.createElement('i');
                 i.id = this.peer_id + '__hand';
@@ -3451,7 +3456,7 @@ class RoomClient {
 
     setVideoOff(peer_info, remotePeer = false) {
         //console.log('setVideoOff', peer_info);
-        let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, p, pm, pb, pv, st;
+        let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, p, pm, pb, pv, st, ri;
 
         const { peer_id, peer_name, peer_avatar, peer_audio, peer_presenter } = peer_info;
 
@@ -3493,6 +3498,13 @@ class RoomClient {
         p.id = peer_id + '__name';
         p.className = html.userName;
         p.innerText = (peer_presenter ? '⭐️ ' : '') + peer_name + (remotePeer ? '' : ' (me) ');
+
+        if (!remotePeer) {
+            ri = this.createElement(peer_id + '__recIndicator', 'span', 'rec-indicator');
+            ri.innerHTML = '🔴 ';
+            p.appendChild(ri);
+            if (this._isRecording) ri.classList.add('active');
+        }
 
         h = document.createElement('i');
         h.id = peer_id + '__hand';
@@ -4020,6 +4032,32 @@ class RoomClient {
 
     isRecording() {
         return this._isRecording;
+    }
+
+    showRecordingIndicator() {
+        this._getRecIndicators().forEach((el) => {
+            el.classList.add('active');
+            el.classList.remove('paused');
+        });
+    }
+
+    hideRecordingIndicator() {
+        this._getRecIndicators().forEach((el) => {
+            el.classList.remove('active', 'paused');
+            el.innerHTML = '🔴 ';
+        });
+    }
+
+    pauseRecordingIndicator() {
+        this._getRecIndicators().forEach((el) => el.classList.add('paused'));
+    }
+
+    resumeRecordingIndicator() {
+        this._getRecIndicators().forEach((el) => el.classList.remove('paused'));
+    }
+
+    _getRecIndicators() {
+        return document.querySelectorAll(`[id^="${this.peer_id}__recIndicator"]`);
     }
 
     hasActiveRecorder() {
