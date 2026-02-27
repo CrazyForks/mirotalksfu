@@ -190,10 +190,12 @@
 
     async function FixWebmDuration(blob, durationMs) {
         if (!blob || blob.type.indexOf('webm') === -1) return blob;
+        const ms = Number(durationMs);
+        if (!Number.isFinite(ms) || ms <= 0) return blob; // skip fix when duration is unknown
         try {
             const buf = await blob.arrayBuffer();
             const file = new WebmFile(new Uint8Array(buf));
-            if (file.fixDuration(Math.max(0, Number(durationMs) || 0))) {
+            if (file.fixDuration(Math.round(ms))) {
                 return file.toBlob(blob.type);
             }
         } catch (_) {
